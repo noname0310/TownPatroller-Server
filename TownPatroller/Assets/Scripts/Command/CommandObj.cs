@@ -23,11 +23,8 @@ public class CommandObj : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            if(CommandInputField.text != "")
-            {
-                IGConsole.Instance.Main.println(">" + CommandInputField.text);
-                CommandInputField.text = "";
-            }
+            IGConsole.Instance.Main.println(">" + CommandInputField.text);
+            CommandInputField.text = "";
             CommandInputField.Select();
             CommandInputField.ActivateInputField();
         }
