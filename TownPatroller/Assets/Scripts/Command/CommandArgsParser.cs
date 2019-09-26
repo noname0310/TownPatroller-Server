@@ -43,7 +43,7 @@ namespace TownPatroller.Command
                 }
                 else
                 {
-                    if(msg[i] != '\"')
+                    if(msg[i] != '\"' && msg[i] != '\\')
                     {
                         stringBuilder.Append(msg[i]);
                     }
