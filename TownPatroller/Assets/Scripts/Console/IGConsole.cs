@@ -19,4 +19,14 @@ public class IGConsole : MonoBehaviour
 
         Main = MainConsoleContent.GetComponent<InGameConsole>();
     }
+
+    public void println(string msg)
+    {
+        Main.println(msg);
+    }
+
+    public void printWarnln(string msg)
+    {
+        Main.printWarnln(msg);
+    }
 }

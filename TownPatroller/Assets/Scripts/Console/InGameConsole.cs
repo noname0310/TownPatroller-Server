@@ -16,7 +16,6 @@ namespace TownPatroller.Console
         private const int CreateTickCount = 10;
         private const int MaxCount = 300;
 
-        private bool firstmsg;
         private int CreatePos;
 
         public void _new(GameObject consoleContent, Text textPrefab, ScrollRect scrollrect)
@@ -28,8 +27,21 @@ namespace TownPatroller.Console
             TextOBJs = new LinkedList<Text>();
             ActiveTextOBJs = new LinkedList<Text>();
 
-            firstmsg = true;
             CreatePos = 0;
+            println("");
+        }
+
+        private int GetCreatePos()
+        {
+            Text htext = Instantiate(TextPrefab, ConsoleContent.transform);
+
+            htext.text = ",";
+            htext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
+            int pos = (int)htext.rectTransform.sizeDelta.y;
+
+            Destroy(htext);
+
+            return pos;
         }
 
         private void CreateTextPrefabs(int createcount)
@@ -69,7 +81,15 @@ namespace TownPatroller.Console
             ActiveTextOBJs.AddFirst(text);
         }
 
-        public void println(string msg)
+        public Text printWarnln(string msg)
+        {
+            Text text = println(msg);
+            text.color = Color.yellow;
+
+            return text;
+        }
+
+        public Text println(string msg)
         {
             if(ActiveTextOBJs.Count >= MaxCount)
             {
@@ -90,16 +110,7 @@ namespace TownPatroller.Console
 
             crtext.gameObject.SetActive(true);
 
-            if (firstmsg)
-            {
-                crtext.text = ",";
-                crtext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
-                CreatePos = (int)crtext.rectTransform.sizeDelta.y;
-                firstmsg = false;
-            }
-
             crtext.text = msg;
-
             crtext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
 
             crtext.rectTransform.localPosition = new Vector3(
@@ -108,9 +119,12 @@ namespace TownPatroller.Console
                 crtext.rectTransform.localPosition.z);
 
             CreatePos += (int)crtext.rectTransform.sizeDelta.y;
+
             ConsoleContent.GetComponent<RectTransform>().sizeDelta = new Vector2(ConsoleContent.GetComponent<RectTransform>().sizeDelta.x, CreatePos);
 
             scrollRect.verticalNormalizedPosition = 0;
+
+            return crtext;
         }
     }
 }
