@@ -1,18 +1,45 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using TownPatroller.SocketServer;
 
 public class SocketObj : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private Queue<Action> TaskQueue;
+    private object lockObject = new object();
+    private SocketServer socketServer;
+
+    private void Start()
     {
-        
+        TaskQueue = new Queue<Action>();
+        socketServer = new SocketServer(TaskQueue, this);
+        socketServer.Start();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        while (TaskQueue.Count > 0)
+        {
+            Action act;
+
+            lock (lockObject)
+            {
+                act = TaskQueue.Dequeue();
+                act.Invoke();
+            }
+        }
+    }
+
+    public void OnReceiveData(ulong Id, byte[] Buffer)
+    {
+
+    }
+
+    public void OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
+    {
+
     }
 }
