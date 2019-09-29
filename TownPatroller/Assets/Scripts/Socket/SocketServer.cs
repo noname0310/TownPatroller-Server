@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
@@ -18,6 +15,7 @@ namespace TownPatroller.SocketServer
         public ClientsManager clientsManager;
         private Task ServerTask;
         private bool StopTask;
+        private bool ServerIsRunning = false;
 
         private SocketServer()
         {
@@ -42,6 +40,16 @@ namespace TownPatroller.SocketServer
 
         public void Start()
         {
+            if (ServerIsRunning)
+            {
+                StopTask = false;
+                if (!ServerIsRunning)
+                {
+                    goto ResetServer;
+                }
+                return;
+            }
+            ResetServer:
             StopTask = false;
             clientSocket = null;
             clientsManager = new ClientsManager();
@@ -53,7 +61,8 @@ namespace TownPatroller.SocketServer
 
         public void Stop()
         {
-            StopTask = true;
+            if (ServerIsRunning)
+                StopTask = true;
         }
 
         private void InitSocket()
@@ -65,6 +74,7 @@ namespace TownPatroller.SocketServer
 
             server.Start(); // 서버 시작
             PrintlnIGConsole("Socket Server Started at " + myIP + ":" + port);
+            ServerIsRunning = true;
             while (!StopTask)
             {
                 clientSocket = server.AcceptTcpClient(); // client 소켓 접속 허용
@@ -72,9 +82,11 @@ namespace TownPatroller.SocketServer
 
                 clientsManager.AddPreClient(clientSocket);
             }
+            ServerIsRunning = false;
             server.Stop();
             clientsManager.Stop();
             clientsManager.DisposeAllClients();
+            PrintlnIGConsole("Socket Server Stopped");
         }
     }
 }
