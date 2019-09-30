@@ -7,7 +7,6 @@ namespace TownPatroller.SocketServer
     {
         protected Queue<Action> TaskQueue;
         protected SocketObj socketObj;
-        protected byte[] Buffer;
 
         protected void PrintlnIGConsole(string msg)
         {
@@ -17,13 +16,25 @@ namespace TownPatroller.SocketServer
 
         protected void OnReceiveData(ulong Id, byte[] Buffer)
         {
-            Action act = () => socketObj.OnReceiveData(Id, Buffer);
+            byte[] BufferC = new byte[Buffer.Length];
+            for (int i = 0; i < Buffer.Length; i++)
+            {
+                BufferC[i] = Buffer[i];
+            }
+
+            Action act = () => socketObj.OnReceiveData(Id, BufferC);
             TaskQueue.Enqueue(act);
         }
 
         protected void OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
         {
-            Action act = () => socketObj.OnPreReceiveData(socketClient, Buffer);
+            byte[] BufferC = new byte[Buffer.Length];
+            for (int i = 0; i < Buffer.Length; i++)
+            {
+                BufferC[i] = Buffer[i];
+            }
+
+            Action act = () => socketObj.OnPreReceiveData(socketClient, BufferC);
             TaskQueue.Enqueue(act);
         }
     }

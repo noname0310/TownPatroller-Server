@@ -28,12 +28,12 @@ namespace TownPatroller.SocketServer
             socketObj = _socketObj;
         }
 
-        private void ClientsManager_OnReceiveData(ulong Id, ref byte[] Buffer)
+        private void ClientsManager_OnReceiveData(ulong Id, byte[] Buffer)
         {
             OnReceiveData(Id, Buffer);
         }
 
-        private void ClientsManager_OnPreReceiveData(SocketClient socketClient, ref byte[] Buffer)
+        private void ClientsManager_OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
         {
             OnPreReceiveData(socketClient, Buffer);
         }

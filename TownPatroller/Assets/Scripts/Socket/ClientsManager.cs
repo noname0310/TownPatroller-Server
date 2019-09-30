@@ -9,8 +9,8 @@ namespace TownPatroller.SocketServer
     {
         private const int BufferSize = 1024 * 4; 
 
-        public delegate void DataInvoked(ulong Id, ref byte[] Buffer);
-        public delegate void PreDataInvoked(SocketClient socketClient, ref byte[] Buffer);
+        public delegate void DataInvoked(ulong Id, byte[] Buffer);
+        public delegate void PreDataInvoked(SocketClient socketClient, byte[] Buffer);
         public event DataInvoked OnReceiveData;
         public event PreDataInvoked OnPreReceiveData;
 
@@ -103,7 +103,7 @@ namespace TownPatroller.SocketServer
                 }
                 else
                 {
-                    OnReceiveData?.Invoke(item.Key, ref item.Value.ReadBuffer);
+                    OnReceiveData?.Invoke(item.Key, item.Value.ReadBuffer);
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace TownPatroller.SocketServer
                 }
                 else
                 {
-                    OnPreReceiveData?.Invoke(item, ref item.ReadBuffer);
+                    OnPreReceiveData?.Invoke(item, item.ReadBuffer);
                 }
             }
         }
