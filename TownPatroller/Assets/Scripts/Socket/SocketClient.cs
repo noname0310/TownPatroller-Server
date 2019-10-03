@@ -1,9 +1,18 @@
 ﻿using System.Net.Sockets;
+using TPPacket.Serializer;
 
 namespace TownPatroller.SocketServer
 {
-    public class SocketClient
+    public interface IClientSender
     {
+        void SendPacket(object packet);
+    }
+
+    public class SocketClient : IClientSender
+    {
+        public delegate void ClientDisposed(ulong Id);
+        public event ClientDisposed OnClientDisposed;
+
         public ulong Id { get; private set; }
         public bool IsPatrollBot { get; private set; }
         public bool IsReady { get; private set; }
@@ -13,33 +22,26 @@ namespace TownPatroller.SocketServer
 
         public TcpClient tcpClient { get; private set; }
 
+        private PacketSerializer packetSerializer;
+
         private SocketClient()
         {
-            Id = 0;
-            CheckReady();
+
         }
 
-        public SocketClient(TcpClient _tcpClient, int BufferSize)
+        public SocketClient(TcpClient _tcpClient, int SegmentSize, int BufferSize)
         {
             Id = 0;
 
-            ReadBuffer = new byte[BufferSize];
-            SendBuffer = new byte[BufferSize];
+            ReadBuffer = new byte[SegmentSize];
+            SendBuffer = new byte[SegmentSize];
 
             tcpClient = _tcpClient;
             m_networkStream = tcpClient.GetStream();
 
             CheckReady();
-        }
 
-        public SocketClient(ulong _Id, bool _IsPatrollBot, TcpClient _tcpClient)
-        {
-            Id = _Id;
-            IsPatrollBot = _IsPatrollBot;
-            tcpClient = _tcpClient;
-            m_networkStream = tcpClient.GetStream();
-
-            CheckReady();
+            packetSerializer = new PacketSerializer(BufferSize, SendBuffer.Length);
         }
 
         public void Update2Client(ulong _Id, bool _IsPatrollBot)
@@ -68,15 +70,31 @@ namespace TownPatroller.SocketServer
             {
                 if (0 < tcpClient.Available)
                     return m_networkStream.Read(ReadBuffer, offset, ReadBuffer.Length);
+                else
+                    return -2;
             }
-            return -1;
+            else
+            {
+                Dispose();
+                return -1;
+            }
         }
 
-        //public void SendPacket(object packet)
-        //{
-        //    //Packet.Serialize(object).CopyTo(sendBuffer, 0);
-        //    SendData();
-        //}
+        public void SendPacket(object packet)
+        {
+            packetSerializer.Serialize(packet);
+            while (true)
+            {
+                int result = packetSerializer.GetSerializedSegment(SendBuffer);
+
+                SendData();
+
+                if (result == 0)
+                {
+                    break;
+                }
+            }
+        }
 
         private void SendData()
         {
@@ -85,14 +103,16 @@ namespace TownPatroller.SocketServer
 
             for (int i = 0; i < SendBuffer.Length; i++)
             {
-                SendBuffer[i] = 0;
+                SendBuffer[i] = 0; 
             }
         }
 
         public void Dispose()
         {
+            OnClientDisposed?.Invoke(Id);
             tcpClient.Dispose();
             m_networkStream.Close();
+            packetSerializer = null;
         }
     }
 }

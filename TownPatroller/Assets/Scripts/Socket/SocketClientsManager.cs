@@ -5,9 +5,13 @@ using System.Net.Sockets;
 
 namespace TownPatroller.SocketServer
 {
-    public class ClientsManager
+    public class SocketClientsManager
     {
-        private const int BufferSize = 1024 * 4; 
+        private const int BufferSize = 1024 * 3;
+        private const int SegmentSize = 1024 * 4;
+
+        public delegate void ClientDisposed(ulong Id);
+        public event ClientDisposed OnClientDisposed;
 
         public delegate void DataInvoked(ulong Id, byte[] Buffer);
         public delegate void PreDataInvoked(SocketClient socketClient, byte[] Buffer);
@@ -20,7 +24,7 @@ namespace TownPatroller.SocketServer
         private Task DataReceiveTask;
         private bool StopTask;
 
-        public ClientsManager()
+        public SocketClientsManager()
         {
             SocketClients = new Dictionary<ulong, SocketClient>();
             PreClients = new List<SocketClient>();
@@ -51,13 +55,14 @@ namespace TownPatroller.SocketServer
 
         public void AddPreClient(TcpClient tcpClient)
         {
-            PreClients.Add(new SocketClient(tcpClient, BufferSize));
+            PreClients.Add(new SocketClient(tcpClient, SegmentSize, BufferSize));
+            PreClients[PreClients.Count - 1].OnClientDisposed += SocketClientsManager_OnClientDisposed;
         }
 
-        public void AddClient(ulong Id, bool IsPatrollBot, TcpClient _TcpClient)
+        private void SocketClientsManager_OnClientDisposed(ulong Id)
         {
-            SocketClient sc = new SocketClient(Id, IsPatrollBot, _TcpClient);
-            SocketClients.Add(Id, sc);
+            OnClientDisposed?.Invoke(Id);
+            RemoveClient(Id);
         }
 
         public SocketClient RemoveClient(ulong Id)
@@ -98,8 +103,11 @@ namespace TownPatroller.SocketServer
                 int result = item.Value.ReadStream(0);
                 if(result == -1)
                 {
-                    item.Value.Dispose();
-                    SocketClients.Remove(item.Key);
+
+                }
+                else if(result == -2)
+                {
+
                 }
                 else
                 {
@@ -115,8 +123,11 @@ namespace TownPatroller.SocketServer
                 int result = item.ReadStream(0);
                 if (result == -1)
                 {
-                    item.Dispose();
-                    PreClients.Remove(item);
+
+                }
+                else if (result == -2)
+                {
+
                 }
                 else
                 {

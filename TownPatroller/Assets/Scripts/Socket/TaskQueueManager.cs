@@ -37,5 +37,11 @@ namespace TownPatroller.SocketServer
             Action act = () => socketObj.OnPreReceiveData(socketClient, BufferC);
             TaskQueue.Enqueue(act);
         }
+
+        protected void OnClientDiposed(ulong Id)
+        {
+            Action act = () => socketObj.OnClientDisposed(Id);
+            TaskQueue.Enqueue(act);
+        }
     }
 }

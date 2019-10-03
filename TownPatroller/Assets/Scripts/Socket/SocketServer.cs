@@ -12,7 +12,7 @@ namespace TownPatroller.SocketServer
 
         private TcpListener server;
         TcpClient clientSocket;
-        public ClientsManager clientsManager;
+        public SocketClientsManager clientsManager;
         private Task ServerTask;
         private bool StopTask;
         private bool ServerIsRunning = false;
@@ -37,6 +37,10 @@ namespace TownPatroller.SocketServer
         {
             OnPreReceiveData(socketClient, Buffer);
         }
+        private void ClientsManager_OnClientDisposed(ulong Id)
+        {
+            OnClientDiposed(Id);
+        }
 
         public void Start()
         {
@@ -52,9 +56,10 @@ namespace TownPatroller.SocketServer
             ResetServer:
             StopTask = false;
             clientSocket = null;
-            clientsManager = new ClientsManager();
+            clientsManager = new SocketClientsManager();
             clientsManager.OnPreReceiveData += ClientsManager_OnPreReceiveData;
             clientsManager.OnReceiveData += ClientsManager_OnReceiveData;
+            clientsManager.OnClientDisposed += ClientsManager_OnClientDisposed;
             ServerTask = new Task(new Action(InitSocket));
             ServerTask.Start();
         }
