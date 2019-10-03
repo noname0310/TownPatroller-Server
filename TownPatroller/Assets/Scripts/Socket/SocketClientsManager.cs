@@ -91,8 +91,12 @@ namespace TownPatroller.SocketServer
 
             while (!StopTask)
             {
-                ReadClientsStream();
-                ReadPreClientsStream();
+                try
+                {
+                    ReadClientsStream();
+                    ReadPreClientsStream();
+                }
+                catch { }
             }
         }
 
@@ -118,20 +122,19 @@ namespace TownPatroller.SocketServer
 
         private void ReadPreClientsStream()
         {
-            foreach (var item in PreClients)
+            //UnityEngine.Debug.Log(PreClients.Count);
+            for (int i = 0; i < PreClients.Count; i++)
             {
-                int result = item.ReadStream(0);
+                int result = PreClients[i].ReadStream(0);
                 if (result == -1)
                 {
-
                 }
                 else if (result == -2)
                 {
-
                 }
                 else
                 {
-                    OnPreReceiveData?.Invoke(item, item.ReadBuffer);
+                    OnPreReceiveData?.Invoke(PreClients[i], PreClients[i].ReadBuffer);
                 }
             }
         }

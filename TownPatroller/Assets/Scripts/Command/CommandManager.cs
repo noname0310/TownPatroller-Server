@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace TownPatroller.Command
 {
@@ -31,6 +32,18 @@ namespace TownPatroller.Command
                 default:
                     break;
             }
+        }
+
+        [Command("start")]
+        public void TestCommServerStartCommand(string command, string[] args)
+        {
+            GameObject.Find("NetworkManager").GetComponent<SocketObj>().socketServer.Start();
+        }
+
+        [Command("stop")]
+        public void TestCommServerStopCommand(string command, string[] args)
+        {
+            GameObject.Find("NetworkManager").GetComponent<SocketObj>().socketServer.Stop();
         }
     }
 }

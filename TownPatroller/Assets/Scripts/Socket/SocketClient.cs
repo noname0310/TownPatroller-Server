@@ -87,13 +87,14 @@ namespace TownPatroller.SocketServer
             {
                 int result = packetSerializer.GetSerializedSegment(SendBuffer);
 
-                SendData();
-
                 if (result == 0)
                 {
                     break;
                 }
+
+                SendData();
             }
+            packetSerializer.Clear();
         }
 
         private void SendData()

@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace TownPatroller.SocketServer
 {
-    class SocketServer : TaskQueueManager
+    public class SocketServer : TaskQueueManager
     {
         private const int port = 20310;
 
@@ -66,26 +66,37 @@ namespace TownPatroller.SocketServer
 
         public void Stop()
         {
+            server.Stop();
+
             if (ServerIsRunning)
                 StopTask = true;
         }
 
         private void InitSocket()
         {
-            IPAddress myIP = IPAddress.Any;
+            //IPAddress myIP = IPAddress.Any;
+            IPAddress myIP = IPAddress.Loopback;
 
-            server = new TcpListener(myIP, port); // 서버 접속 IP, 포트
+            server = new TcpListener(myIP, port);
             clientsManager.Start();
 
-            server.Start(); // 서버 시작
+            server.Start();
             PrintlnIGConsole("Socket Server Started at " + myIP + ":" + port);
             ServerIsRunning = true;
             while (!StopTask)
             {
-                clientSocket = server.AcceptTcpClient(); // client 소켓 접속 허용
-                PrintlnIGConsole("Accept connection from client");
+                try
+                {
+                    clientSocket = server.AcceptTcpClient();
+                    PrintlnIGConsole("Accept connection from client");
 
-                clientsManager.AddPreClient(clientSocket);
+                    clientsManager.AddPreClient(clientSocket);
+                }
+                catch (SocketException e)
+                {
+                    if ((e.SocketErrorCode == SocketError.Interrupted))
+                        break;
+                }
             }
             ServerIsRunning = false;
             server.Stop();

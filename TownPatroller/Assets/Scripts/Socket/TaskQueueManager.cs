@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TownPatroller.SocketServer
 {
-    class TaskQueueManager
+    public class TaskQueueManager
     {
         protected Queue<Action> TaskQueue;
         protected SocketObj socketObj;

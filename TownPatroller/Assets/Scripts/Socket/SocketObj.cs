@@ -12,7 +12,7 @@ public class SocketObj : MonoBehaviour
     private ClientsManagerObj clientsManagerObj;
     private Queue<Action> TaskQueue;
     private object lockObject = new object();
-    private SocketServer socketServer;
+    public SocketServer socketServer;
 
     private void Start()
     {
@@ -24,6 +24,12 @@ public class SocketObj : MonoBehaviour
         TaskQueue = new Queue<Action>();
         socketServer = new SocketServer(TaskQueue, this);
         socketServer.Start();
+    }
+
+    private void OnApplicationQuit()
+    {
+        Debug.Log("server stopped");
+        socketServer.Stop();
     }
 
     private void Update()
@@ -55,11 +61,15 @@ public class SocketObj : MonoBehaviour
             if (socketServer.clientsManager.SocketClients.ContainsKey(connectionpacket.ClientId))
             {
                 socketClient.SendPacket(new ConnectionPacket(false, 0, false));
+                socketClient.Dispose();
+                IGConsole.Instance.println("Same Client Already Connected");
             }
             else
             {
                 socketServer.clientsManager.UpdatePreClient(connectionpacket.ClientId, connectionpacket.IsBot, socketClient);
                 clientsManagerObj.clientsManager.AddClient(new BaseClient(connectionpacket.ClientId, socketClient, connectionpacket.IsBot));
+                socketClient.SendPacket(new ConnectionPacket(true, 0, false));
+                IGConsole.Instance.println("Client Connected    ID(" + connectionpacket.ClientId + ") ISBOT(" + connectionpacket.IsBot + ")");
             }
         }
         else
@@ -71,5 +81,6 @@ public class SocketObj : MonoBehaviour
     public void OnClientDisposed(ulong Id)
     {
         clientsManagerObj.clientsManager.RemoveClient(Id);
+        receiverObj.Dispose(Id);
     }
 }
