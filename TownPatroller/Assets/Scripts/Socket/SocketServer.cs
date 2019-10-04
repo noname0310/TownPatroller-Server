@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using TPPacket.Packet;
 
 namespace TownPatroller.SocketServer
 {
@@ -66,6 +67,15 @@ namespace TownPatroller.SocketServer
 
         public void Stop()
         {
+            foreach (var item in clientsManager.SocketClients)
+            {
+                item.Value.SendPacket(new ConnectionPacket(false, 0, false, false));
+            }
+            foreach (var item in clientsManager.PreClients)
+            {
+                item.SendPacket(new ConnectionPacket(false, 0, false, false));
+            }
+
             server.Stop();
 
             if (ServerIsRunning)

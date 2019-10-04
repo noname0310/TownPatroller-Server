@@ -41,7 +41,11 @@ public class SocketObj : MonoBehaviour
             lock (lockObject)
             {
                 act = TaskQueue.Dequeue();
-                act.Invoke();
+                act?.Invoke();
+                if(act == null)
+                {
+
+                }
             }
         }
     }
@@ -60,7 +64,7 @@ public class SocketObj : MonoBehaviour
             ConnectionPacket connectionpacket = (ConnectionPacket)basePacket;
             if (socketServer.clientsManager.SocketClients.ContainsKey(connectionpacket.ClientId))
             {
-                socketClient.SendPacket(new ConnectionPacket(false, 0, false));
+                socketClient.SendPacket(new ConnectionPacket(false, 0, false, true));
                 socketClient.Dispose();
                 IGConsole.Instance.println("Same Client Already Connected");
             }

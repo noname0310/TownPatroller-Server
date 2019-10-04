@@ -4,9 +4,11 @@ using UnityEngine;
 using TPPacket.Packet;
 using TPPacket.PacketManager;
 
+
+public delegate void DataInvoke(ulong Id, BasePacket basePacket);
+
 public class PacketReceiverObj : MonoBehaviour
 {
-    public delegate void DataInvoke(ulong Id, BasePacket basePacket);
     public event DataInvoke OnDataInvoke;
 
     private Dictionary<ulong, PacketReciver> PacketRecivers;
