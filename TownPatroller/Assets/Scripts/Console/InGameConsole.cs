@@ -111,6 +111,7 @@ namespace TownPatroller.Console
             crtext.gameObject.SetActive(true);
 
             crtext.text = msg;
+            crtext.color = Color.white;
             crtext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
 
             crtext.rectTransform.localPosition = new Vector3(

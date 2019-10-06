@@ -71,7 +71,14 @@ public class SocketObj : MonoBehaviour
             else
             {
                 socketServer.clientsManager.UpdatePreClient(connectionpacket.ClientId, connectionpacket.IsBot, socketClient);
-                clientsManagerObj.clientsManager.AddClient(new BaseClient(connectionpacket.ClientId, socketClient, connectionpacket.IsBot));
+                if (connectionpacket.IsBot)
+                {
+                    clientsManagerObj.clientsManager.AddClient(new HardwareClient(connectionpacket.ClientId, socketClient));
+                }
+                else
+                {
+                    clientsManagerObj.clientsManager.AddClient(new ConsoleClient(connectionpacket.ClientId, socketClient));
+                }
                 socketClient.SendPacket(new ConnectionPacket(true, 0, false));
                 IGConsole.Instance.println("Client Connected    ID(" + connectionpacket.ClientId + ") ISBOT(" + connectionpacket.IsBot + ")");
             }
@@ -86,5 +93,6 @@ public class SocketObj : MonoBehaviour
     {
         clientsManagerObj.clientsManager.RemoveClient(Id);
         receiverObj.Dispose(Id);
+        IGConsole.Instance.println("Client Disconnected ID(" + Id + ")");
     }
 }

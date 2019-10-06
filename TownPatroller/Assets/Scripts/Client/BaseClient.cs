@@ -21,7 +21,21 @@ namespace TownPatroller.Client
             IsBot = _IsBot;
         }
 
-        public virtual void ReceiveData(BasePacket basePacket)
+        public void ReceiveData(BasePacket basePacket)
+        {
+            if(basePacket.packetType == PacketType.ConnectionStat)
+            {
+                ConnectionPacket cp = (ConnectionPacket)basePacket;
+                if(cp.IsConnecting == false)
+                {
+                    clientSender.Dispose();
+                }
+            }
+
+            ManualReceiveData(basePacket);
+        }
+
+        public virtual void ManualReceiveData(BasePacket basePacket)
         {
 
         }

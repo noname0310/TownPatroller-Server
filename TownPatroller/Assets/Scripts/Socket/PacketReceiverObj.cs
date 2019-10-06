@@ -28,6 +28,7 @@ public class PacketReceiverObj : MonoBehaviour
         {
             PacketRecivers.Add(Id, new PacketReciver(Id));
             PacketRecivers[Id].OnDataInvoke += PacketReceiverObj_OnDataInvoke;
+            PacketRecivers[Id].AddSegment(segment);
         }
     }
 

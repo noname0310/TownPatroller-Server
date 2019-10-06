@@ -57,6 +57,12 @@ namespace TownPatroller.SocketServer
         {
             PreClients.Add(new SocketClient(tcpClient, SegmentSize, BufferSize));
             PreClients[PreClients.Count - 1].OnClientDisposed += SocketClientsManager_OnClientDisposed;
+            PreClients[PreClients.Count - 1].OnPreClientDisposed += SocketClientsManager_OnPreClientDisposed;
+        }
+
+        private void SocketClientsManager_OnPreClientDisposed(SocketClient socketClient)
+        {
+            RemovePreClient(socketClient);
         }
 
         private void SocketClientsManager_OnClientDisposed(ulong Id)
@@ -70,6 +76,16 @@ namespace TownPatroller.SocketServer
             if (SocketClients.TryGetValue(Id, out SocketClient sc))
             {
                 SocketClients.Remove(Id);
+            }
+
+            return sc;
+        }
+
+        public SocketClient RemovePreClient(SocketClient sc)
+        {
+            if (PreClients.Contains(sc))
+            {
+                PreClients.Remove(sc);
             }
 
             return sc;

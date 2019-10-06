@@ -6,12 +6,16 @@ namespace TownPatroller.SocketServer
     public interface IClientSender
     {
         void SendPacket(object packet);
+        void Dispose();
     }
 
     public class SocketClient : IClientSender
     {
         public delegate void ClientDisposed(ulong Id);
         public event ClientDisposed OnClientDisposed;
+
+        public delegate void PreClientDisposed(SocketClient socketClient);
+        public event PreClientDisposed OnPreClientDisposed;
 
         public ulong Id { get; private set; }
         public bool IsPatrollBot { get; private set; }
@@ -110,7 +114,14 @@ namespace TownPatroller.SocketServer
 
         public void Dispose()
         {
-            OnClientDisposed?.Invoke(Id);
+            if (Id == 0)
+            {
+                OnPreClientDisposed?.Invoke(this);
+            }
+            else
+            {
+                OnClientDisposed?.Invoke(Id);
+            }
             tcpClient.Dispose();
             m_networkStream.Close();
             packetSerializer = null;

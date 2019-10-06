@@ -17,9 +17,10 @@ namespace TownPatroller.Client
 
         public ConsoleClient(ulong _Id, SocketClient socketClient) : base(_Id, socketClient, true)
         {
+
         }
 
-        public override void ReceiveData(BasePacket basePacket)
+        public override void ManualReceiveData(BasePacket basePacket)
         {
 
         }
