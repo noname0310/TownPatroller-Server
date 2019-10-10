@@ -20,32 +20,35 @@ namespace TownPatroller.SocketServer
         public ulong Id { get; private set; }
         public bool IsPatrollBot { get; private set; }
         public bool IsReady { get; private set; }
-        public NetworkStream m_networkStream { get; private set; }
+        public NetworkStream NetworkStream { get; private set; }
         public byte[] ReadBuffer;
         public byte[] SendBuffer;
+        public int SegmentSize { get; private set; }
 
-        public TcpClient tcpClient { get; private set; }
+        public TcpClient TcpClient { get; private set; }
 
-        private PacketSerializer packetSerializer;
+        private PacketSerializer _packetSerializer;
 
         private SocketClient()
         {
 
         }
 
-        public SocketClient(TcpClient _tcpClient, int SegmentSize, int BufferSize)
+        public SocketClient(TcpClient tcpClient, int segmentSize, int BufferSize)
         {
             Id = 0;
 
+            SegmentSize = segmentSize;
             ReadBuffer = new byte[SegmentSize];
             SendBuffer = new byte[SegmentSize];
 
-            tcpClient = _tcpClient;
-            m_networkStream = tcpClient.GetStream();
+            this.TcpClient = tcpClient;
+
+            NetworkStream = this.TcpClient.GetStream();
 
             CheckReady();
 
-            packetSerializer = new PacketSerializer(BufferSize, SendBuffer.Length);
+            _packetSerializer = new PacketSerializer(BufferSize, SendBuffer.Length);
         }
 
         public void Update2Client(ulong _Id, bool _IsPatrollBot)
@@ -58,7 +61,7 @@ namespace TownPatroller.SocketServer
 
         private void CheckReady()
         {
-            if(Id != 0 || tcpClient != null)
+            if(Id != 0 || TcpClient != null)
             {
                 IsReady = true;
             }
@@ -68,12 +71,28 @@ namespace TownPatroller.SocketServer
             }
         }
 
-        public int ReadStream(int offset)
+        public int ReadStream()
         {
-            if (tcpClient.Connected)
+            if (TcpClient.Connected)
             {
-                if (0 < tcpClient.Available)
-                    return m_networkStream.Read(ReadBuffer, offset, ReadBuffer.Length);
+                if (0 < TcpClient.Available)
+                {
+                    int remaining = SegmentSize;
+                    int offset = 0;
+
+                    while(remaining > 0)
+                    {
+                        var readBytes = NetworkStream.Read(ReadBuffer, offset, remaining);
+                        if (readBytes == 0)
+                        {
+                            throw new System.Exception("disconnected");
+                        }
+                        offset += readBytes;
+                        remaining -= readBytes;
+                    }
+
+                    return 0;
+                }
                 else
                     return -2;
             }
@@ -86,10 +105,10 @@ namespace TownPatroller.SocketServer
 
         public void SendPacket(object packet)
         {
-            packetSerializer.Serialize(packet);
+            _packetSerializer.Serialize(packet);
             while (true)
             {
-                int result = packetSerializer.GetSerializedSegment(SendBuffer);
+                int result = _packetSerializer.GetSerializedSegment(SendBuffer);
 
                 if (result == 0)
                 {
@@ -98,13 +117,13 @@ namespace TownPatroller.SocketServer
 
                 SendData();
             }
-            packetSerializer.Clear();
+            _packetSerializer.Clear();
         }
 
         private void SendData()
         {
-            m_networkStream.Write(SendBuffer, 0, SendBuffer.Length);
-            m_networkStream.Flush();
+            NetworkStream.Write(SendBuffer, 0, SendBuffer.Length);
+            NetworkStream.Flush();
 
             for (int i = 0; i < SendBuffer.Length; i++)
             {
@@ -122,9 +141,9 @@ namespace TownPatroller.SocketServer
             {
                 OnClientDisposed?.Invoke(Id);
             }
-            tcpClient.Dispose();
-            m_networkStream.Close();
-            packetSerializer = null;
+            TcpClient.Dispose();
+            NetworkStream.Close();
+            _packetSerializer = null;
         }
     }
 }

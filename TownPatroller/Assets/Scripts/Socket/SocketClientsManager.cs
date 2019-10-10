@@ -7,8 +7,8 @@ namespace TownPatroller.SocketServer
 {
     public class SocketClientsManager
     {
-        private const int BufferSize = 1024 * 3;
-        private const int SegmentSize = 1024 * 4;
+        private const int BufferSize = 724;
+        private const int SegmentSize = 1024;
 
         public delegate void ClientDisposed(ulong Id);
         public event ClientDisposed OnClientDisposed;
@@ -120,7 +120,7 @@ namespace TownPatroller.SocketServer
         {
             foreach (var item in SocketClients)
             {
-                int result = item.Value.ReadStream(0);
+                int result = item.Value.ReadStream();
                 if(result == -1)
                 {
 
@@ -141,7 +141,7 @@ namespace TownPatroller.SocketServer
             //UnityEngine.Debug.Log(PreClients.Count);
             for (int i = 0; i < PreClients.Count; i++)
             {
-                int result = PreClients[i].ReadStream(0);
+                int result = PreClients[i].ReadStream();
                 if (result == -1)
                 {
                 }

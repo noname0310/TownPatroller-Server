@@ -85,7 +85,7 @@ namespace TownPatroller.SocketServer
         private void InitSocket()
         {
             //IPAddress myIP = IPAddress.Any;
-            IPAddress myIP = IPAddress.Loopback;
+            IPAddress myIP = IPAddress.Any;
 
             server = new TcpListener(myIP, port);
             clientsManager.Start();
