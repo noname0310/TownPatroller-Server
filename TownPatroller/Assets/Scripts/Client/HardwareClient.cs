@@ -13,20 +13,10 @@ namespace TownPatroller.Client
 {
     class HardwareClient : BaseClient
     {
-        /// <summary>
-        /// 읽기 가능 멤버들
-        /// </summary>
-        /// 
-
         public GPSPosition gPSPosition { get; private set; }
         public float rotation { get; private set; }
         public Texture CamFrame { get; private set; }
         public Cardevice cardevice { get; private set; }
-
-        /// <summary>
-        /// 읽고 패킷 통신 할당이 가능한 멤버들
-        /// </summary>
-        /// 
 
         public GPSSpotManager spotManager
         {
@@ -61,19 +51,9 @@ namespace TownPatroller.Client
             rotation = -1;
         }
 
-        public void SetCarMember(CarMember carMember, ushort value)
+        public void SetCardevice(Cardevice cardevice)
         {
-            SendPacket(new CarStatusChangeReqPacket(carMember, value, 0, false));
-        }
-
-        public void SetCarMember(CarMember carMember, byte value)
-        {
-            SendPacket(new CarStatusChangeReqPacket(carMember, 0, value, false));
-        }
-
-        public void SetCarMember(CarMember carMember, bool value)
-        {
-            SendPacket(new CarStatusChangeReqPacket(carMember, 0, 0, value));
+            SendPacket(new CarStatusChangeReqPacket(cardevice));
         }
 
         public override void ManualReceiveData(BasePacket basePacket)
@@ -100,6 +80,7 @@ namespace TownPatroller.Client
                     cardevice = csp.cardevice;
                     gPSPosition = csp.position;
                     rotation = csp.rotation;
+                    SendPacket(new CarStatusRecivedPacket());
                     break;
 
                 case PacketType.CarGPSSpotStatus:
