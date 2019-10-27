@@ -77,7 +77,7 @@ public class SocketObj : MonoBehaviour
                 }
                 else
                 {
-                    clientsManagerObj.clientsManager.AddClient(new ConsoleClient(connectionpacket.ClientId, socketClient));
+                    clientsManagerObj.clientsManager.AddClient(new ConsoleClient(connectionpacket.ClientId, socketClient, clientsManagerObj.clientsManager.Clients));
                 }
                 socketClient.SendPacket(new ConnectionPacket(true, 0, false));
                 IGConsole.Instance.println("Client Connected    ID(" + connectionpacket.ClientId + ") ISBOT(" + connectionpacket.IsBot + ")");

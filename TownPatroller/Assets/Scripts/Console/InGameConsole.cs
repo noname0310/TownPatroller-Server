@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -91,6 +92,9 @@ namespace TownPatroller.Console
 
         public Text println(string msg)
         {
+            if (msg != "")
+                msg = DateTime.Now.ToString("[hh:mm:ss] ") + msg;
+
             if(ActiveTextOBJs.Count >= MaxCount)
             {
                 GetOlderText();

@@ -34,7 +34,7 @@ public class PacketReceiverObj : MonoBehaviour
 
     private void PacketReceiverObj_OnDataInvoke(ulong Id, BasePacket basePacket)
     {
-        IGConsole.Instance.println(Id + basePacket.packetType.ToString());
+        IGConsole.Instance.println("" + Id + ":" + basePacket.packetType.ToString() + " - PacketReceived");
         OnDataInvoke?.Invoke(Id, basePacket);
     }
 

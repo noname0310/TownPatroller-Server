@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using TownPatroller.SocketServer;
-using TownPatroller.Client.Helper;
 using TPPacket.Packet;
 using TPPacket.Class;
 
@@ -13,9 +12,12 @@ namespace TownPatroller.Client
 {
     class HardwareClient : BaseClient
     {
+        private List<ConsoleClient> viwerConsoleClients;
+
+        private bool IsFullyListening
+
         public GPSPosition gPSPosition { get; private set; }
         public float rotation { get; private set; }
-        public Texture CamFrame { get; private set; }
         public Cardevice cardevice { get; private set; }
 
         public GPSSpotManager spotManager
@@ -44,11 +46,24 @@ namespace TownPatroller.Client
 
         private GPSSpotManager _spotManager;
         private ModeType _modeType;
-        private Texture2D texture2D;
+        public byte[] textureByte { get; private set; }
 
         public HardwareClient (ulong _Id, SocketClient socketClient) : base(_Id, socketClient, true)
         {
             rotation = -1;
+            viwerConsoleClients = new List<ConsoleClient>();
+        }
+
+        public void AddViwer(ConsoleClient consoleClient)
+        {
+            viwerConsoleClients.Add(consoleClient);
+
+
+        }
+
+        public void RemoveViwer(ConsoleClient consoleClient)
+        {
+
         }
 
         public void SetCardevice(Cardevice cardevice)
@@ -65,14 +80,8 @@ namespace TownPatroller.Client
 
                 case PacketType.CamFrame:
                     CamPacket cp = (CamPacket)basePacket;
-                    if (texture2D != null)
-                    {
-                        UnityEngine.Object.Destroy(texture2D);
-                    }
-                    texture2D = TextureConverter.Base64ToTexture2D(cp.CamFrame);
-                    CamFrame = texture2D;
+                    textureByte = cp.CamFrame;
                     SendPacket(new CamPacketRecived());
-                    GameObject.Find("TestIMG").GetComponent<UnityEngine.UI.RawImage>().texture = CamFrame;
                     break;
 
                 case PacketType.CarStatus:
