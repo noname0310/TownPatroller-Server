@@ -40,6 +40,7 @@ namespace TownPatroller.Client
         {
             if (Clients.ContainsKey(Id))
             {
+                Clients[Id].Dispose();
                 Clients.Remove(Id);
             }
         }

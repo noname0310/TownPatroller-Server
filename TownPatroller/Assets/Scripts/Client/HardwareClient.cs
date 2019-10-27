@@ -14,7 +14,7 @@ namespace TownPatroller.Client
     {
         private List<ConsoleClient> viwerConsoleClients;
 
-        private bool IsFullyListening
+        private bool IsCamListening;
 
         public GPSPosition gPSPosition { get; private set; }
         public float rotation { get; private set; }
@@ -46,24 +46,42 @@ namespace TownPatroller.Client
 
         private GPSSpotManager _spotManager;
         private ModeType _modeType;
-        public byte[] textureByte { get; private set; }
 
         public HardwareClient (ulong _Id, SocketClient socketClient) : base(_Id, socketClient, true)
         {
             rotation = -1;
             viwerConsoleClients = new List<ConsoleClient>();
+            IsCamListening = false;
+        }
+        public override void Dispose()
+        {
+            foreach (var item in viwerConsoleClients)
+            {
+                item.SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewBotList));
+            }
         }
 
         public void AddViwer(ConsoleClient consoleClient)
         {
             viwerConsoleClients.Add(consoleClient);
 
+            if (IsCamListening == false)
+            {
+                IsCamListening = true;
 
+                SendPacket(new CamConfigPacket(CamaraConfigType.SendFrame, true));
+            }
         }
 
         public void RemoveViwer(ConsoleClient consoleClient)
         {
+            viwerConsoleClients.Remove(consoleClient);
 
+            if (viwerConsoleClients.Count == 0)
+            {
+                SendPacket(new CamConfigPacket(CamaraConfigType.SendFrame, false));
+                IsCamListening = false;
+            }
         }
 
         public void SetCardevice(Cardevice cardevice)
@@ -75,12 +93,11 @@ namespace TownPatroller.Client
         {
             switch (basePacket.packetType)
             {
-                //case PacketType.ConnectionStat:
-                    //break;
-
                 case PacketType.CamFrame:
-                    CamPacket cp = (CamPacket)basePacket;
-                    textureByte = cp.CamFrame;
+                    foreach (var item in viwerConsoleClients)
+                    {
+                        item.SendPacket(basePacket);
+                    }
                     SendPacket(new CamPacketRecived());
                     break;
 
@@ -89,12 +106,20 @@ namespace TownPatroller.Client
                     cardevice = csp.cardevice;
                     gPSPosition = csp.position;
                     rotation = csp.rotation;
+                    foreach (var item in viwerConsoleClients)
+                    {
+                        item.SendPacket(basePacket);
+                    }
                     SendPacket(new CarStatusRecivedPacket());
                     break;
 
                 case PacketType.CarGPSSpotStatus:
                     CarGPSSpotStatusPacket cgssp = (CarGPSSpotStatusPacket)basePacket;
-                    _spotManager = cgssp.gPSMover;
+                    _spotManager = cgssp.gPSMover; 
+                    foreach (var item in viwerConsoleClients)
+                    {
+                        item.SendPacket(basePacket);
+                    }
                     break;
 
                 //case PacketType.CarStatusChanged:
@@ -102,7 +127,11 @@ namespace TownPatroller.Client
 
                 case PacketType.UpdateDataChanged:
                     DataUpdatedPacket dup = (DataUpdatedPacket)basePacket;
-                    _modeType = dup.modeType;
+                    _modeType = dup.modeType; 
+                    foreach (var item in viwerConsoleClients)
+                    {
+                        item.SendPacket(basePacket);
+                    }
                     break;
 
                //case PacketType.UniversalCommand:

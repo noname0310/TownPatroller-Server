@@ -8,7 +8,7 @@ using TPPacket.Packet;
 
 namespace TownPatroller.Client
 {
-    public class BaseClient
+    public abstract class BaseClient
     {
         public readonly ulong Id;
         private readonly IClientSender clientSender;
@@ -35,14 +35,12 @@ namespace TownPatroller.Client
             ManualReceiveData(basePacket);
         }
 
-        public virtual void ManualReceiveData(BasePacket basePacket)
-        {
-
-        }
-
         public void SendPacket(BasePacket basePacket)
         {
             clientSender.SendPacket(basePacket);
         }
+        public abstract void ManualReceiveData(BasePacket basePacket);
+
+        public abstract void Dispose();
     }
 }

@@ -21,6 +21,12 @@ namespace TownPatroller.Client
             Clients = clients;
         }
 
+        public override void Dispose()
+        {
+            if (Clients.ContainsKey(TargetBot))
+                ((HardwareClient)Clients[TargetBot]).RemoveViwer(this);
+        }
+
         public override void ManualReceiveData(BasePacket basePacket)
         {
             switch (basePacket.packetType)
@@ -48,10 +54,23 @@ namespace TownPatroller.Client
                     switch (cup.consoleMode)
                     {
                         case ConsoleMode.ViewBotList:
-
+                            if (Clients.ContainsKey(TargetBot) == true)
+                            {
+                                ((HardwareClient)Clients[TargetBot]).RemoveViwer(this);
+                                SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewBotList));
+                            }
                             break;
                         case ConsoleMode.ViewSingleBot:
-
+                            if (Clients.ContainsKey(cup.TargetBot))
+                            {
+                                ((HardwareClient)Clients[cup.TargetBot]).AddViwer(this);
+                                TargetBot = cup.TargetBot; 
+                                SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewSingleBot));
+                            }
+                            else
+                            {
+                                SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewBotList));
+                            }
                             break;
                         default:
                             break;
