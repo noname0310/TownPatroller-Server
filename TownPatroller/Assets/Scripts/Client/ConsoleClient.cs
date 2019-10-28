@@ -16,6 +16,9 @@ namespace TownPatroller.Client
         private ulong TargetBot;
         private Dictionary<ulong, BaseClient> Clients;
 
+        public bool ReceivedCamFrame;
+        public bool ReceivedCarStatus;
+
         public ConsoleClient(ulong _Id, SocketClient socketClient, Dictionary<ulong, BaseClient> clients) : base(_Id, socketClient, false)
         {
             Clients = clients;
@@ -32,21 +35,44 @@ namespace TownPatroller.Client
             switch (basePacket.packetType)
             {
                 case PacketType.CamConfig:
+                    CamConfigPacket ccp = (CamConfigPacket)basePacket;
+                    switch (ccp.camaraConfigType)
+                    {
+                        case CamaraConfigType.ChangeCamara:
+                            if (Clients.ContainsKey(TargetBot))
+                                Clients[TargetBot].SendPacket(basePacket);
+                            break;
+                        case CamaraConfigType.SendFrame:
+                            break;
+                        default:
+                            break;
+                    }
                     break;
 
                 case PacketType.CamReceived:
+                    ReceivedCamFrame = true;
                     break;
 
                 case PacketType.CarStatusReceived:
+                    ReceivedCarStatus = true;
                     break;
 
                 case PacketType.CarStatusChangeReq:
+                    CarStatusChangeReqPacket cscr = (CarStatusChangeReqPacket)basePacket;
+                    if (Clients.ContainsKey(TargetBot) == true)
+                    {
+                        ((HardwareClient)Clients[TargetBot]).SetCardevice(cscr.ReqCarDevice);
+                    }
                     break;
 
                 case PacketType.CarGPSSpotStatusChangeReq:
                     break;
 
                 case PacketType.UpdateDataReq:
+                    if (Clients.ContainsKey(TargetBot) == true)
+                    {
+                        Clients[TargetBot].SendPacket(basePacket);
+                    }
                     break;
 
                 case PacketType.UpdateConsoleModeReq:
@@ -63,9 +89,12 @@ namespace TownPatroller.Client
                         case ConsoleMode.ViewSingleBot:
                             if (Clients.ContainsKey(cup.TargetBot))
                             {
+                                ReceivedCamFrame = true;
+                                ReceivedCarStatus = true;
                                 ((HardwareClient)Clients[cup.TargetBot]).AddViwer(this);
                                 TargetBot = cup.TargetBot; 
                                 SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewSingleBot));
+                                SendPacket(new DataUpdatedPacket(((HardwareClient)Clients[cup.TargetBot]).modeType));
                             }
                             else
                             {

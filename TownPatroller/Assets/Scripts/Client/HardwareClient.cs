@@ -84,9 +84,9 @@ namespace TownPatroller.Client
             }
         }
 
-        public void SetCardevice(Cardevice cardevice)
+        public void SetCardevice(ReqCarDevice reqCarDevice)
         {
-            SendPacket(new CarStatusChangeReqPacket(cardevice));
+            SendPacket(new CarStatusChangeReqPacket(reqCarDevice));
         }
 
         public override void ManualReceiveData(BasePacket basePacket)
@@ -96,7 +96,11 @@ namespace TownPatroller.Client
                 case PacketType.CamFrame:
                     foreach (var item in viwerConsoleClients)
                     {
-                        item.SendPacket(basePacket);
+                        if (item.ReceivedCamFrame == true)
+                        {
+                            item.ReceivedCamFrame = false;
+                            item.SendPacket(basePacket);
+                        }
                     }
                     SendPacket(new CamPacketRecived());
                     break;
@@ -108,7 +112,11 @@ namespace TownPatroller.Client
                     rotation = csp.rotation;
                     foreach (var item in viwerConsoleClients)
                     {
-                        item.SendPacket(basePacket);
+                        if (item.ReceivedCarStatus == true)
+                        {
+                            item.ReceivedCarStatus = false;
+                            item.SendPacket(basePacket);
+                        }
                     }
                     SendPacket(new CarStatusRecivedPacket());
                     break;

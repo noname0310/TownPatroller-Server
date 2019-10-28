@@ -84,7 +84,7 @@ namespace TownPatroller.Console
 
         public Text printWarnln(string msg)
         {
-            Text text = println(msg);
+            Text text = println(msg, false);
             text.color = Color.yellow;
 
             return text;
@@ -92,7 +92,12 @@ namespace TownPatroller.Console
 
         public Text println(string msg)
         {
-            if (msg != "")
+            return println(msg, true);
+        }
+
+        public Text println(string msg, bool DisplayTIme)
+        {
+            if (msg != "" && DisplayTIme == true)
                 msg = DateTime.Now.ToString("[hh:mm:ss] ") + msg;
 
             if(ActiveTextOBJs.Count >= MaxCount)
