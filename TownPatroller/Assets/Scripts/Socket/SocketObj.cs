@@ -42,10 +42,6 @@ public class SocketObj : MonoBehaviour
             {
                 act = TaskQueue.Dequeue();
                 act?.Invoke();
-                if(act == null)
-                {
-
-                }
             }
         }
     }
