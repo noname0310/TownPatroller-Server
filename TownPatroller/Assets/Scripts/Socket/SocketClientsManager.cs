@@ -7,7 +7,7 @@ namespace TownPatroller.SocketServer
 {
     public class SocketClientsManager
     {
-        private const int BufferSize = 724;
+        private const int BufferSize = 798;
         private const int SegmentSize = 1024;
 
         public delegate void ClientDisposed(ulong Id);

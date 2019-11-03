@@ -22,7 +22,7 @@ public class SocketObj : MonoBehaviour
         clientsManagerObj.Init(receiverObj);
 
         TaskQueue = new Queue<Action>();
-        socketServer = new SocketServer(TaskQueue, this);
+        socketServer = new SocketServer(TaskQueue, this, lockObject);
         socketServer.Start();
     }
 
@@ -41,8 +41,8 @@ public class SocketObj : MonoBehaviour
             lock (lockObject)
             {
                 act = TaskQueue.Dequeue();
-                act?.Invoke();
             }
+            act.Invoke();
         }
     }
 

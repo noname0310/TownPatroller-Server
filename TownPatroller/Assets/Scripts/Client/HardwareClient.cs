@@ -20,32 +20,9 @@ namespace TownPatroller.Client
         public float rotation { get; private set; }
         public Cardevice cardevice { get; private set; }
 
-        public GPSSpotManager spotManager
-        {
-            get
-            {
-                return _spotManager;
-            }
-            set
-            {
-                SendPacket(new CarGPSSpotStatusChangeReqPacket(value));
-            }
-        }
+        public ModeType modeType { get; private set; }
 
-        public ModeType modeType
-        {
-            get
-            {
-                return _modeType;
-            }
-            set
-            {
-                SendPacket(new DataUpdatePacket(value));
-            }
-        }
-
-        private GPSSpotManager _spotManager;
-        private ModeType _modeType;
+        private GPSSpotManager spotManager;
 
         public HardwareClient (ulong _Id, SocketClient socketClient) : base(_Id, socketClient, true)
         {
@@ -70,6 +47,7 @@ namespace TownPatroller.Client
                 IsCamListening = true;
 
                 SendPacket(new CamConfigPacket(CamaraConfigType.SendFrame, true));
+                consoleClient.SendPacket(new CarGPSSpotStatusPacket(GPSSpotManagerChangeType.OverWrite, spotManager));
             }
         }
 
@@ -110,6 +88,7 @@ namespace TownPatroller.Client
                     cardevice = csp.cardevice;
                     gPSPosition = csp.position;
                     rotation = csp.rotation;
+                    SendPacket(new CarStatusRecivedPacket());
                     foreach (var item in viwerConsoleClients)
                     {
                         if (item.ReceivedCarStatus == true)
@@ -118,12 +97,27 @@ namespace TownPatroller.Client
                             item.SendPacket(basePacket);
                         }
                     }
-                    SendPacket(new CarStatusRecivedPacket());
                     break;
 
                 case PacketType.CarGPSSpotStatus:
                     CarGPSSpotStatusPacket cgssp = (CarGPSSpotStatusPacket)basePacket;
-                    _spotManager = cgssp.gPSMover; 
+                    switch (cgssp.GPSSpotManagerChangeType)
+                    {
+                        case GPSSpotManagerChangeType.AddSpot:
+                            spotManager.AddPos(cgssp.GPSPosition);
+                            break;
+                        case GPSSpotManagerChangeType.RemoveSpot:
+                            spotManager.RemovePos(cgssp.Index);
+                            break;
+                        case GPSSpotManagerChangeType.SetCurrentPos:
+                            spotManager.CurrentMovePosIndex = cgssp.Index;
+                            break;
+                        case GPSSpotManagerChangeType.OverWrite:
+                            spotManager = cgssp.GPSMover;
+                            break;
+                        default:
+                            break;
+                    }
                     foreach (var item in viwerConsoleClients)
                     {
                         item.SendPacket(basePacket);
@@ -135,7 +129,7 @@ namespace TownPatroller.Client
 
                 case PacketType.UpdateDataChanged:
                     DataUpdatedPacket dup = (DataUpdatedPacket)basePacket;
-                    _modeType = dup.modeType; 
+                    modeType = dup.modeType; 
                     foreach (var item in viwerConsoleClients)
                     {
                         item.SendPacket(basePacket);

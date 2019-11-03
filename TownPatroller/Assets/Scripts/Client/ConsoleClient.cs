@@ -66,6 +66,10 @@ namespace TownPatroller.Client
                     break;
 
                 case PacketType.CarGPSSpotStatusChangeReq:
+                    if (Clients.ContainsKey(TargetBot) == true)
+                    {
+                        Clients[TargetBot].SendPacket(basePacket);
+                    }
                     break;
 
                 case PacketType.UpdateDataReq:

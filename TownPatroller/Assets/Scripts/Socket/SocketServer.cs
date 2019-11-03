@@ -18,12 +18,7 @@ namespace TownPatroller.SocketServer
         private bool StopTask;
         private bool ServerIsRunning = false;
 
-        private SocketServer()
-        {
-
-        }
-
-        public SocketServer(Queue<Action> taskQueue, SocketObj _socketObj)
+        public SocketServer(Queue<Action> taskQueue, SocketObj _socketObj, object LockObject) : base(LockObject)
         {
             TaskQueue = taskQueue;
             socketObj = _socketObj;

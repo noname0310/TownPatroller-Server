@@ -8,10 +8,16 @@ namespace TownPatroller.SocketServer
         protected Queue<Action> TaskQueue;
         protected SocketObj socketObj;
 
+        private object lockObject;
+        public TaskQueueManager(object LockObject)
+        {
+            lockObject = LockObject;
+        }
+
         protected void PrintlnIGConsole(string msg)
         {
             Action act = () => IGConsole.Instance.println(msg);
-            TaskQueue.Enqueue(act);
+            LockEnqueue(act);
         }
 
         protected void OnReceiveData(ulong Id, byte[] Buffer)
@@ -23,7 +29,7 @@ namespace TownPatroller.SocketServer
             }
 
             Action act = () => socketObj.OnReceiveData(Id, BufferC);
-            TaskQueue.Enqueue(act);
+            LockEnqueue(act);
         }
 
         protected void OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
@@ -35,13 +41,21 @@ namespace TownPatroller.SocketServer
             }
 
             Action act = () => socketObj.OnPreReceiveData(socketClient, BufferC);
-            TaskQueue.Enqueue(act);
+            LockEnqueue(act);
         }
 
         protected void OnClientDiposed(ulong Id)
         {
             Action act = () => socketObj.OnClientDisposed(Id);
-            TaskQueue.Enqueue(act);
+            LockEnqueue(act);
+        }
+
+        private void LockEnqueue(Action action)
+        {
+            lock (lockObject)
+            {
+                TaskQueue.Enqueue(action);
+            }
         }
     }
 }
