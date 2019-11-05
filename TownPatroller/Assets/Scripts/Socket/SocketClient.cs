@@ -29,11 +29,6 @@ namespace TownPatroller.SocketServer
 
         private PacketSerializer _packetSerializer;
 
-        private SocketClient()
-        {
-
-        }
-
         public SocketClient(TcpClient tcpClient, int segmentSize, int BufferSize)
         {
             Id = 0;
@@ -42,9 +37,9 @@ namespace TownPatroller.SocketServer
             ReadBuffer = new byte[SegmentSize];
             SendBuffer = new byte[SegmentSize];
 
-            this.TcpClient = tcpClient;
+            TcpClient = tcpClient;
 
-            NetworkStream = this.TcpClient.GetStream();
+            NetworkStream = TcpClient.GetStream();
 
             CheckReady();
 

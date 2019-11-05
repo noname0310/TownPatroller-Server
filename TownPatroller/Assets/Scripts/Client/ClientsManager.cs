@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TPPacket.Class;
 using TPPacket.Packet;
 
 namespace TownPatroller.Client
@@ -33,6 +34,25 @@ namespace TownPatroller.Client
             if (!Clients.ContainsKey(baseClient.Id))
             {
                 Clients.Add(baseClient.Id, baseClient);
+
+                if(baseClient.IsBot == true)
+                {
+                    List<ClientInfo> clientInfos = new List<ClientInfo>();
+                    foreach (var item in Clients)
+                    {
+                        if (item.Value.IsBot == true)
+                        {
+                            clientInfos.Add(new ClientInfo(item.Value.Id, ((HardwareClient)(item.Value)).gPSPosition));
+                        }
+                    }
+                    foreach (var item in Clients)
+                    {
+                        if (item.Value.IsBot == false)
+                        {
+                            item.Value.SendPacket(new ClientinfoPacket(clientInfos.ToArray()));
+                        }
+                    }
+                }
             }
         }
 

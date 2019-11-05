@@ -53,6 +53,13 @@ namespace TownPatroller.Client
                     ReceivedCamFrame = true;
                     break;
 
+                case PacketType.CamResolutionReq:
+                    if (Clients.ContainsKey(TargetBot) == true)
+                    {
+                        Clients[TargetBot].SendPacket(basePacket);
+                    }
+                    break;
+
                 case PacketType.CarStatusReceived:
                     ReceivedCarStatus = true;
                     break;
@@ -99,6 +106,8 @@ namespace TownPatroller.Client
                                 TargetBot = cup.TargetBot; 
                                 SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewSingleBot));
                                 SendPacket(new DataUpdatedPacket(((HardwareClient)Clients[cup.TargetBot]).modeType));
+                                SendPacket(new CarGPSSpotStatusPacket(GPSSpotManagerChangeType.OverWrite, ((HardwareClient)Clients[cup.TargetBot]).spotManager));
+                                SendPacket(new CamResolutionPacket(((HardwareClient)Clients[cup.TargetBot]).CamQuality));
                             }
                             else
                             {

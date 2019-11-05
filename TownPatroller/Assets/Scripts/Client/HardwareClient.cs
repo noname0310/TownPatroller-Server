@@ -22,7 +22,9 @@ namespace TownPatroller.Client
 
         public ModeType modeType { get; private set; }
 
-        private GPSSpotManager spotManager;
+        public GPSSpotManager spotManager { get; private set; }
+
+        public int CamQuality { get; private set; }
 
         public HardwareClient (ulong _Id, SocketClient socketClient) : base(_Id, socketClient, true)
         {
@@ -47,7 +49,6 @@ namespace TownPatroller.Client
                 IsCamListening = true;
 
                 SendPacket(new CamConfigPacket(CamaraConfigType.SendFrame, true));
-                consoleClient.SendPacket(new CarGPSSpotStatusPacket(GPSSpotManagerChangeType.OverWrite, spotManager));
             }
         }
 
@@ -81,6 +82,15 @@ namespace TownPatroller.Client
                         }
                     }
                     SendPacket(new CamPacketRecived());
+                    break;
+
+                case PacketType.CamResolution:
+                    CamResolutionPacket crp = (CamResolutionPacket)basePacket;
+                    CamQuality = crp.Resolution;
+                    foreach (var item in viwerConsoleClients)
+                    {
+                        item.SendPacket(basePacket);
+                    }
                     break;
 
                 case PacketType.CarStatus:
