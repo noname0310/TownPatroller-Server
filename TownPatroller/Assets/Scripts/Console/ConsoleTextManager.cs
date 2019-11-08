@@ -14,7 +14,6 @@ public class ConsoleTextManager : MonoBehaviour
 
     private InGameConsole MainConsole;
 
-    // Start is called before the first frame update
     void Awake()
     {
         MainScrollView = GameObject.Find("Console Scroll View");

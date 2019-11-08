@@ -121,7 +121,9 @@ namespace TownPatroller.Console
 
             crtext.text = msg;
             crtext.color = Color.white;
-            crtext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
+            Canvas.ForceUpdateCanvases();
+            crtext.transform.parent.GetComponent<VerticalLayoutGroup>().enabled = false;
+            crtext.transform.parent.GetComponent<VerticalLayoutGroup>().enabled = true;
 
             crtext.rectTransform.localPosition = new Vector3(
                 crtext.rectTransform.localPosition.x, 

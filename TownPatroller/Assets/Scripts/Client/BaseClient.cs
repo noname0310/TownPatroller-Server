@@ -10,6 +10,9 @@ namespace TownPatroller.Client
 {
     public abstract class BaseClient
     {
+        public delegate void PacketSended(ulong Id, BasePacket basePacket);
+        public event PacketSended OnPacketSended;
+
         public readonly ulong Id;
         private readonly IClientSender clientSender;
         public readonly bool IsBot;
@@ -38,7 +41,14 @@ namespace TownPatroller.Client
         public void SendPacket(BasePacket basePacket)
         {
             clientSender.SendPacket(basePacket);
+            OnPacketSended?.Invoke(Id, basePacket);
         }
+
+        public void RootDispose()
+        {
+            clientSender.Dispose();
+        }
+
         public abstract void ManualReceiveData(BasePacket basePacket);
 
         public abstract void Dispose();

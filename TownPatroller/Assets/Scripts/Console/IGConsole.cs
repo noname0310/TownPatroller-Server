@@ -25,6 +25,11 @@ public class IGConsole : MonoBehaviour
         Main.println(msg);
     }
 
+    public void println(string msg, bool DisplayTime)
+    {
+        Main.println(msg, DisplayTime);
+    }
+
     public void printWarnln(string msg)
     {
         Main.printWarnln(msg);

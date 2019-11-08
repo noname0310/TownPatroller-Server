@@ -15,6 +15,8 @@ namespace TownPatroller.Client
         private List<ConsoleClient> viwerConsoleClients;
 
         private bool IsCamListening;
+        
+        public int ViwerCount { get { return viwerConsoleClients.Count; } }
 
         public GPSPosition gPSPosition { get; private set; }
         public float rotation { get; private set; }
@@ -133,9 +135,6 @@ namespace TownPatroller.Client
                         item.SendPacket(basePacket);
                     }
                     break;
-
-                //case PacketType.CarStatusChanged:
-                    //break;
 
                 case PacketType.UpdateDataChanged:
                     DataUpdatedPacket dup = (DataUpdatedPacket)basePacket;

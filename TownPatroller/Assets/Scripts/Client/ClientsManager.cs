@@ -10,7 +10,10 @@ namespace TownPatroller.Client
 {
     public class ClientsManager
     {
-        public Dictionary<ulong, BaseClient> Clients { get; set; }
+        public delegate void PacketSended(ulong Id, BasePacket basePacket);
+        public event PacketSended OnPacketSended;
+
+        public Dictionary<ulong, BaseClient> Clients { get; private set; }
         private PacketReceiverObj PacketReciver;
 
         public ClientsManager(PacketReceiverObj _PacketReciver)
@@ -33,6 +36,7 @@ namespace TownPatroller.Client
         {
             if (!Clients.ContainsKey(baseClient.Id))
             {
+                baseClient.OnPacketSended += (Id, basepacket) => { OnPacketSended?.Invoke(Id, basepacket); };
                 Clients.Add(baseClient.Id, baseClient);
 
                 if(baseClient.IsBot == true)

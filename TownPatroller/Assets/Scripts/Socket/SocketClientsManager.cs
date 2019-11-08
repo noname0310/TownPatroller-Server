@@ -43,11 +43,23 @@ namespace TownPatroller.SocketServer
 
         public void DisposeAllClients()
         {
+            Dictionary<ulong, SocketClient> SC = new Dictionary<ulong, SocketClient>();
+            List<SocketClient> PC = new List<SocketClient>(); 
+
             foreach (var item in SocketClients)
+            {
+                SC.Add(item.Key, item.Value);
+            }
+            foreach (var item in PreClients)
+            {
+                PC.Add(item);
+            }
+
+            foreach (var item in SC)
             {
                 item.Value.Dispose();
             }
-            foreach (var item in PreClients)
+            foreach (var item in PC)
             {
                 item.Dispose();
             }
@@ -138,7 +150,6 @@ namespace TownPatroller.SocketServer
 
         private void ReadPreClientsStream()
         {
-            //UnityEngine.Debug.Log(PreClients.Count);
             for (int i = 0; i < PreClients.Count; i++)
             {
                 int result = PreClients[i].ReadStream();

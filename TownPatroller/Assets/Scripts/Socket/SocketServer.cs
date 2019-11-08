@@ -12,16 +12,21 @@ namespace TownPatroller.SocketServer
         private const int port = 20310;
 
         private TcpListener server;
-        TcpClient clientSocket;
-        public SocketClientsManager clientsManager;
+        private TcpClient clientSocket;
         private Task ServerTask;
-        private bool StopTask;
-        private bool ServerIsRunning = false;
+        public SocketClientsManager clientsManager { get; private set; }
+        public bool ServerIsRunning { get; private set; }
 
         public SocketServer(Queue<Action> taskQueue, SocketObj _socketObj, object LockObject) : base(LockObject)
         {
             TaskQueue = taskQueue;
             socketObj = _socketObj;
+            ServerIsRunning = false;
+
+            clientsManager = new SocketClientsManager();
+            clientsManager.OnPreReceiveData += ClientsManager_OnPreReceiveData;
+            clientsManager.OnReceiveData += ClientsManager_OnReceiveData;
+            clientsManager.OnClientDisposed += ClientsManager_OnClientDisposed;
         }
 
         private void ClientsManager_OnReceiveData(ulong Id, byte[] Buffer)
@@ -42,20 +47,9 @@ namespace TownPatroller.SocketServer
         {
             if (ServerIsRunning)
             {
-                StopTask = false;
-                if (!ServerIsRunning)
-                {
-                    goto ResetServer;
-                }
                 return;
             }
-            ResetServer:
-            StopTask = false;
             clientSocket = null;
-            clientsManager = new SocketClientsManager();
-            clientsManager.OnPreReceiveData += ClientsManager_OnPreReceiveData;
-            clientsManager.OnReceiveData += ClientsManager_OnReceiveData;
-            clientsManager.OnClientDisposed += ClientsManager_OnClientDisposed;
             ServerTask = new Task(new Action(InitSocket));
             ServerTask.Start();
         }
@@ -72,14 +66,10 @@ namespace TownPatroller.SocketServer
             }
 
             server.Stop();
-
-            if (ServerIsRunning)
-                StopTask = true;
         }
 
         private void InitSocket()
         {
-            //IPAddress myIP = IPAddress.Any;
             IPAddress myIP = IPAddress.Any;
 
             server = new TcpListener(myIP, port);
@@ -88,7 +78,7 @@ namespace TownPatroller.SocketServer
             server.Start();
             PrintlnIGConsole("Socket Server Started at " + myIP + ":" + port);
             ServerIsRunning = true;
-            while (!StopTask)
+            while (true)
             {
                 try
                 {
@@ -104,7 +94,6 @@ namespace TownPatroller.SocketServer
                 }
             }
             ServerIsRunning = false;
-            server.Stop();
             clientsManager.Stop();
             clientsManager.DisposeAllClients();
             PrintlnIGConsole("Socket Server Stopped");

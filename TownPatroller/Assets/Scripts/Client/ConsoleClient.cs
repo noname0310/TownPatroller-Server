@@ -13,7 +13,7 @@ namespace TownPatroller.Client
     class ConsoleClient : BaseClient
     {
         public ConsoleMode consoleMode { get; private set; }
-        private ulong TargetBot;
+        public ulong TargetBot { get; private set; }
         private Dictionary<ulong, BaseClient> Clients;
 
         public bool ReceivedCamFrame;
@@ -22,12 +22,15 @@ namespace TownPatroller.Client
         public ConsoleClient(ulong _Id, SocketClient socketClient, Dictionary<ulong, BaseClient> clients) : base(_Id, socketClient, false)
         {
             Clients = clients;
+            TargetBot = 0;
         }
 
         public override void Dispose()
         {
             if (Clients.ContainsKey(TargetBot))
                 ((HardwareClient)Clients[TargetBot]).RemoveViwer(this);
+
+            TargetBot = 0;
         }
 
         public override void ManualReceiveData(BasePacket basePacket)
@@ -95,6 +98,7 @@ namespace TownPatroller.Client
                             {
                                 ((HardwareClient)Clients[TargetBot]).RemoveViwer(this);
                                 SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewBotList));
+                                TargetBot = 0;
                             }
                             break;
                         case ConsoleMode.ViewSingleBot:
