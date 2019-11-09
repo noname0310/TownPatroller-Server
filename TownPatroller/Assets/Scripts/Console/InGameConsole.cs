@@ -17,7 +17,7 @@ namespace TownPatroller.Console
         private const int CreateTickCount = 10;
         private const int MaxCount = 300;
 
-        private int CreatePos;
+        private float CreatePos;
 
         public void _new(GameObject consoleContent, Text textPrefab, ScrollRect scrollrect)
         {
@@ -28,21 +28,7 @@ namespace TownPatroller.Console
             TextOBJs = new LinkedList<Text>();
             ActiveTextOBJs = new LinkedList<Text>();
 
-            CreatePos = GetCreatePos();
-        }
-
-        private int GetCreatePos()
-        {
-            Text htext = Instantiate(TextPrefab, ConsoleContent.transform);
-
-            htext.text = "...";
-            //LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)htext.transform);
-            Canvas.ForceUpdateCanvases();
-            int pos = (int)htext.rectTransform.sizeDelta.y;
-
-            Destroy(htext);
-
-            return pos;
+            CreatePos = 0;
         }
 
         private void CreateTextPrefabs(int createcount)
@@ -56,7 +42,7 @@ namespace TownPatroller.Console
 
         private void GetOlderText()
         {
-            CreatePos -= (int)ActiveTextOBJs.Last.Value.rectTransform.sizeDelta.y;
+            CreatePos -= ActiveTextOBJs.Last.Value.rectTransform.sizeDelta.y;
 
             for (int i = 0; i < ConsoleContent.transform.childCount; i++)
             {
@@ -129,7 +115,7 @@ namespace TownPatroller.Console
                 crtext.rectTransform.localPosition.y - CreatePos - (crtext.rectTransform.sizeDelta.y/2), 
                 crtext.rectTransform.localPosition.z);
 
-            CreatePos += (int)crtext.rectTransform.sizeDelta.y;
+            CreatePos += crtext.rectTransform.sizeDelta.y;
 
             ConsoleContent.GetComponent<RectTransform>().sizeDelta = new Vector2(ConsoleContent.GetComponent<RectTransform>().sizeDelta.x, CreatePos);
 
