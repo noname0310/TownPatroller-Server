@@ -28,16 +28,16 @@ namespace TownPatroller.Console
             TextOBJs = new LinkedList<Text>();
             ActiveTextOBJs = new LinkedList<Text>();
 
-            CreatePos = 0;
-            println("");
+            CreatePos = GetCreatePos();
         }
 
         private int GetCreatePos()
         {
             Text htext = Instantiate(TextPrefab, ConsoleContent.transform);
 
-            htext.text = ",";
-            htext.GetComponent<ContentSizeFitter>().SetLayoutVertical();
+            htext.text = "...";
+            //LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)htext.transform);
+            Canvas.ForceUpdateCanvases();
             int pos = (int)htext.rectTransform.sizeDelta.y;
 
             Destroy(htext);
@@ -121,13 +121,12 @@ namespace TownPatroller.Console
 
             crtext.text = msg;
             crtext.color = Color.white;
+            //LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)crtext.transform);
             Canvas.ForceUpdateCanvases();
-            crtext.transform.parent.GetComponent<VerticalLayoutGroup>().enabled = false;
-            crtext.transform.parent.GetComponent<VerticalLayoutGroup>().enabled = true;
 
             crtext.rectTransform.localPosition = new Vector3(
                 crtext.rectTransform.localPosition.x, 
-                crtext.rectTransform.localPosition.y - CreatePos, 
+                crtext.rectTransform.localPosition.y - CreatePos - (crtext.rectTransform.sizeDelta.y/2), 
                 crtext.rectTransform.localPosition.z);
 
             CreatePos += (int)crtext.rectTransform.sizeDelta.y;
