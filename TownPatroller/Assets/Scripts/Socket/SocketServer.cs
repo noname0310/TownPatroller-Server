@@ -29,14 +29,14 @@ namespace TownPatroller.SocketServer
             clientsManager.OnClientDisposed += ClientsManager_OnClientDisposed;
         }
 
-        private void ClientsManager_OnReceiveData(ulong Id, byte[] Buffer)
+        private void ClientsManager_OnReceiveData(ulong Id, byte[] Buffer, int DataLength)
         {
-            OnReceiveData(Id, Buffer);
+            OnReceiveData(Id, Buffer, DataLength);
         }
 
-        private void ClientsManager_OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
+        private void ClientsManager_OnPreReceiveData(SocketClient socketClient, byte[] Buffer, int DataLength)
         {
-            OnPreReceiveData(socketClient, Buffer);
+            OnPreReceiveData(socketClient, Buffer, DataLength);
         }
         private void ClientsManager_OnClientDisposed(ulong Id)
         {

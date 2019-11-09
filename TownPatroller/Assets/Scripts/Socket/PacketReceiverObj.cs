@@ -16,7 +16,7 @@ public class PacketReceiverObj : MonoBehaviour
         PacketRecivers = new Dictionary<ulong, PacketReciver>();
     }
 
-    public void AddSegment(ulong Id, Segment segment)
+    public void AddSegment(ulong Id, byte[] segment)
     {
         if (PacketRecivers.ContainsKey(Id))
         {

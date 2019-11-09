@@ -73,13 +73,12 @@ public class SocketObj : MonoBehaviour
 
     public void OnReceiveData(ulong Id, byte[] Buffer)
     {
-        Segment segment = (Segment)PacketDeserializer.Deserialize(Buffer);
-        receiverObj.AddSegment(Id, segment);
+        receiverObj.AddSegment(Id, Buffer);
     }
 
     public void OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
     {
-        BasePacket basePacket = (BasePacket)PacketDeserializer.Deserialize(Buffer);
+        BasePacket basePacket = (BasePacket)PacketDeserializer.Deserialize(Buffer, PacketHeaderSize.HeaderSize);
         if(basePacket.packetType == PacketType.ConnectionStat)
         {
             ConnectionPacket connectionpacket = (ConnectionPacket)basePacket;

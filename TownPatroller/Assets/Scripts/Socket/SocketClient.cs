@@ -8,7 +8,6 @@ namespace TownPatroller.SocketServer
         void SendPacket(object packet);
         void Dispose();
     }
-
     public class SocketClient : IClientSender
     {
         public delegate void ClientDisposed(ulong Id);
@@ -23,19 +22,19 @@ namespace TownPatroller.SocketServer
         public NetworkStream NetworkStream { get; private set; }
         public byte[] ReadBuffer;
         public byte[] SendBuffer;
-        public int SegmentSize { get; private set; }
+        public int FullSegmentSize { get; private set; }
 
         public TcpClient TcpClient { get; private set; }
 
         private PacketSerializer _packetSerializer;
 
-        public SocketClient(TcpClient tcpClient, int segmentSize, int BufferSize)
+        public SocketClient(TcpClient tcpClient, int fullSegmentSize, int segmentSize)
         {
             Id = 0;
 
-            SegmentSize = segmentSize;
-            ReadBuffer = new byte[SegmentSize];
-            SendBuffer = new byte[SegmentSize];
+            FullSegmentSize = fullSegmentSize;
+            ReadBuffer = new byte[FullSegmentSize];//1024
+            SendBuffer = new byte[FullSegmentSize];//1024
 
             TcpClient = tcpClient;
 
@@ -43,7 +42,7 @@ namespace TownPatroller.SocketServer
 
             CheckReady();
 
-            _packetSerializer = new PacketSerializer(BufferSize, SendBuffer.Length);
+            _packetSerializer = new PacketSerializer(segmentSize);//1012
         }
 
         public void Update2Client(ulong _Id, bool _IsPatrollBot)
@@ -72,21 +71,11 @@ namespace TownPatroller.SocketServer
             {
                 if (0 < TcpClient.Available)
                 {
-                    int remaining = SegmentSize;
-                    int offset = 0;
+                    ReadNetworkStreamToReadBuffer(0, PacketHeaderSize.HeaderSize);
+                    HeaderInfo headerInfo = PacketDeserializer.ParseHeader(ReadBuffer);
+                    ReadNetworkStreamToReadBuffer(PacketHeaderSize.HeaderSize, headerInfo.SegmentLength);
 
-                    while(remaining > 0)
-                    {
-                        var readBytes = NetworkStream.Read(ReadBuffer, offset, remaining);
-                        if (readBytes == 0)
-                        {
-                            throw new System.Exception("disconnected");
-                        }
-                        offset += readBytes;
-                        remaining -= readBytes;
-                    }
-
-                    return 0;
+                    return PacketHeaderSize.HeaderSize + headerInfo.SegmentLength;
                 }
                 else
                     return -2;
@@ -98,32 +87,39 @@ namespace TownPatroller.SocketServer
             }
         }
 
+        public void ReadNetworkStreamToReadBuffer(int offset, int Length)
+        {
+            int remainingBytes = Length;
+            int Offset = offset;
+
+            while (remainingBytes > 0)
+            {
+                var readBytes = NetworkStream.Read(ReadBuffer, Offset, remainingBytes);
+                if (readBytes == 0)
+                {
+                    throw new System.Exception("disconnected");
+                }
+                Offset += readBytes;
+                remainingBytes -= readBytes;
+            }
+        }
+
         public void SendPacket(object packet)
         {
             _packetSerializer.Serialize(packet);
-            while (true)
+            for (int i = 0; i < _packetSerializer.SegmentCount; i++)
             {
-                int result = _packetSerializer.GetSerializedSegment(SendBuffer);
+                int fullSegmentLength = _packetSerializer.GetSerializedSegment(SendBuffer);
 
-                if (result == 0)
-                {
-                    break;
-                }
-
-                SendData();
+                SendData(fullSegmentLength);
             }
             _packetSerializer.Clear();
         }
 
-        private void SendData()
+        private void SendData(int length)
         {
-            NetworkStream.Write(SendBuffer, 0, SendBuffer.Length);
+            NetworkStream.Write(SendBuffer, 0, length);
             NetworkStream.Flush();
-
-            for (int i = 0; i < SendBuffer.Length; i++)
-            {
-                SendBuffer[i] = 0; 
-            }
         }
 
         public void Dispose()

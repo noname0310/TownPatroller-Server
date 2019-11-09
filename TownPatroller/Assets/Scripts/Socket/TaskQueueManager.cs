@@ -20,10 +20,10 @@ namespace TownPatroller.SocketServer
             LockEnqueue(act);
         }
 
-        protected void OnReceiveData(ulong Id, byte[] Buffer)
+        protected void OnReceiveData(ulong Id, byte[] Buffer, int DataLength)
         {
-            byte[] BufferC = new byte[Buffer.Length];
-            for (int i = 0; i < Buffer.Length; i++)
+            byte[] BufferC = new byte[DataLength];
+            for (int i = 0; i < DataLength; i++)
             {
                 BufferC[i] = Buffer[i];
             }
@@ -32,10 +32,10 @@ namespace TownPatroller.SocketServer
             LockEnqueue(act);
         }
 
-        protected void OnPreReceiveData(SocketClient socketClient, byte[] Buffer)
+        protected void OnPreReceiveData(SocketClient socketClient, byte[] Buffer, int DataLength)
         {
-            byte[] BufferC = new byte[Buffer.Length];
-            for (int i = 0; i < Buffer.Length; i++)
+            byte[] BufferC = new byte[DataLength];
+            for (int i = 0; i < DataLength; i++)
             {
                 BufferC[i] = Buffer[i];
             }
