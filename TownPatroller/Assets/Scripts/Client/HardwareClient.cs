@@ -40,6 +40,7 @@ namespace TownPatroller.Client
             {
                 item.SendPacket(new ConsoleUpdatedPacket(ConsoleMode.ViewBotList));
             }
+            viwerConsoleClients.Clear();
         }
 
         public void AddViwer(ConsoleClient consoleClient)
@@ -56,7 +57,8 @@ namespace TownPatroller.Client
 
         public void RemoveViwer(ConsoleClient consoleClient)
         {
-            viwerConsoleClients.Remove(consoleClient);
+            if (viwerConsoleClients.Contains(consoleClient))
+                viwerConsoleClients.Remove(consoleClient);
 
             if (viwerConsoleClients.Count == 0)
             {

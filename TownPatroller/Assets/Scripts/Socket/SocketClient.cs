@@ -5,7 +5,7 @@ namespace TownPatroller.SocketServer
 {
     public interface IClientSender
     {
-        void SendPacket(object packet);
+        bool SendPacket(object packet);
         void Dispose();
     }
     public class SocketClient : IClientSender
@@ -104,8 +104,11 @@ namespace TownPatroller.SocketServer
             }
         }
 
-        public void SendPacket(object packet)
+        public bool SendPacket(object packet)
         {
+            if (_packetSerializer == null)
+                return false;
+
             _packetSerializer.Serialize(packet);
             for (int i = 0; i < _packetSerializer.SegmentCount; i++)
             {
@@ -114,6 +117,8 @@ namespace TownPatroller.SocketServer
                 SendData(fullSegmentLength);
             }
             _packetSerializer.Clear();
+
+            return true;
         }
 
         private void SendData(int length)

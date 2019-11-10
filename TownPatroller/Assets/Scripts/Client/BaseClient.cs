@@ -40,8 +40,8 @@ namespace TownPatroller.Client
 
         public void SendPacket(BasePacket basePacket)
         {
-            clientSender.SendPacket(basePacket);
-            OnPacketSended?.Invoke(Id, basePacket);
+            if (clientSender.SendPacket(basePacket))
+                OnPacketSended?.Invoke(Id, basePacket);
         }
 
         public void RootDispose()
